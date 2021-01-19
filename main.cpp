@@ -77,6 +77,8 @@ int main()
     float rockSpeed=50.0f;
 
     Clock clock; 
+    
+    float a;
 
     while (window.isOpen()){
         
@@ -87,7 +89,7 @@ int main()
 
         Time dt=clock.restart();
         
-        if(grass1==false){
+        if(!grass1){
             //grass1 speed
             srand(time(NULL)*2);
             grass1Speed = (rand()%50+50);
@@ -122,7 +124,7 @@ int main()
         if(!food){
             //x food
             srand(time(NULL)*3);
-            float x=(rand()%600)+101;
+            float x=(rand()%560)+101;
             spriteFood.setPosition(x,-40);
             food=true;
         }else{
@@ -130,7 +132,7 @@ int main()
             spriteFood.setPosition(
             spriteFood.getPosition().x,    
             spriteFood.getPosition().y+(foodSpeed * dt.asSeconds()));
-        
+            float a= spriteFood.getPosition().x;
             if(spriteFood.getPosition().y >810){
                 food=false;
             }
@@ -139,11 +141,11 @@ int main()
         if(!rock){
             //x rock
             srand(time(NULL)*3);
-            float xr;
+            float x=(rand()%540)+101;
             do{
-            float xr=(rand()%600)+101;
-            }while(spriteFood.getPosition().x==xr);
-            spriteRock.setPosition(xr,-60);
+            float x=(rand()%540)+101;
+            }while(a==x);
+            spriteRock.setPosition(x,-60);
             rock=true;
         }else{
             //moving rock
