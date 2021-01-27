@@ -1,5 +1,6 @@
 #include "stdfix.h"
 #include <SFML/Graphics.hpp>
+#include <sstream>
 
 using namespace sf;
 int main()
@@ -13,7 +14,25 @@ int main()
     Sprite spriteBackground;
     spriteBackground.setTexture(textureBackground);
     spriteBackground.setPosition(0,0);
-    
+
+    //rock
+    Texture textureRock;
+    textureRock.loadFromFile("project image/rock.png");
+    Sprite spriteRock;
+    spriteRock.setTexture(textureRock);
+    spriteRock.setPosition(400,100);   
+    bool rock=false;
+    float rockSpeed=70.0f;
+
+    //food
+    Texture textureFood;
+    textureFood.loadFromFile("project image/food.png");
+    Sprite spriteFood;
+    spriteFood.setTexture(textureFood);
+    spriteFood.setPosition(300,100);
+    bool food=false;
+    float foodSpeed=70.0f;
+
     //grass sides
     Texture textureGrasside1;
     textureGrasside1.loadFromFile("project image/grass side.jfif");
@@ -51,15 +70,6 @@ int main()
     spriteShark.setTexture(textureShark);
     spriteShark.setPosition(370,400);    
 
-    //food
-    Texture textureFood;
-    textureFood.loadFromFile("project image/food.png");
-    Sprite spriteFood;
-    spriteFood.setTexture(textureFood);
-    spriteFood.setPosition(300,100);
-    bool food=false;
-    float foodSpeed=50.0f;
-
     //shooter
     Texture textureShooter;
     textureShooter.loadFromFile("project image/shooter.png");
@@ -67,18 +77,57 @@ int main()
     spriteShooter.setTexture(textureShooter);
     spriteShooter.setPosition(400,350);    
 
-    //rock
-    Texture textureRock;
-    textureRock.loadFromFile("project image/rock.png");
-    Sprite spriteRock;
-    spriteRock.setTexture(textureRock);
-    spriteRock.setPosition(400,100);   
-    bool rock=false;
-    float rockSpeed=50.0f;
-
     Clock clock; 
-    
+
+    //foodBar
+    Texture textureFoodBar;
+    textureFoodBar.loadFromFile("project image/frame.png");
+    Sprite spriteFoodBar;
+    spriteFoodBar.setTexture(textureFoodBar);
+    spriteFoodBar.setPosition(10,10);   
+
+    RectangleShape foodBar;
+    float foodBarwidth =200;
+    float foodBarheight =80;
+    foodBar.setSize(Vector2f(foodBarwidth,foodBarheight));
+    foodBar.setFillColor(Color::White);
+    foodBar.setPosition(10,10);
+
+    Time gamefoodTotal;
+    float foodRemaining =37.0f;
+    float foodBarwidthperSecond = foodBarwidth / foodRemaining;
+   
+    //texts
+    Text massageText;
+    Text foodText;
+    Text RecordText;
+
+    Font font;
+    font.loadFromFile("font.ttf");
+
+    massageText.setFont(font);
+    massageText.setString("Press Enter to start!");
+    massageText.setCharacterSize(75);
+    massageText.setFillColor(Color::Black);
+    massageText.setPosition(40,250);
+
+    foodText.setFont(font); 
+    foodText.setString("food");
+    foodText.setCharacterSize(80);
+    foodText.setFillColor(Color::Black);
+    foodText.setPosition(10,0);
+
+    RecordText.setFont(font);
+    RecordText.setString("Record = 0");
+    RecordText.setCharacterSize(30);
+    RecordText.setFillColor(Color::Black);
+    RecordText.setPosition(350,0);
+
+    bool pause=true;
+
     float a;
+    int record;
+    int hold=0;
 
     while (window.isOpen()){
         
@@ -87,8 +136,33 @@ int main()
             window.close();
         }
 
-        Time dt=clock.restart();
-        
+        if(Keyboard::isKeyPressed(Keyboard::Return)){
+            pause=false;
+            record =0;
+            float foodRemaining =37.0f;
+            foodBarwidth=200;
+            foodBar.setSize(Vector2f(200,80));
+        }
+        if(pause==false){
+
+            //changing foodBar Size
+            Time dt=clock.restart();            
+            foodRemaining -=dt.asSeconds();
+            foodBar.setSize(Vector2f(foodBarwidthperSecond*foodRemaining,foodBarheight));
+            if(foodRemaining<= 0.0f){
+                pause=true;
+                massageText.setString("Out of food!!");
+                massageText.setPosition(160,250);
+            }
+        //record
+        hold ++; 
+        record +=hold/20;
+        if(hold==20)
+            hold=0;
+        std::stringstream ss;
+        ss << "Record = " << record;
+        RecordText.setString(ss.str());    
+
         if(!grass1){
             //grass1 speed
             srand(time(NULL)*2);
@@ -157,18 +231,27 @@ int main()
                 rock=false;
             }
         }
+        }
 
         window.clear();
         
         window.draw(spriteBackground);
         window.draw(spriteFood);
+        window.draw(spriteRock);
         window.draw(spriteShark);
         window.draw(spriteGrasside1);
         window.draw(spriteGrasside2);
         window.draw(spriteGrasmove1);
         window.draw(spriteGrasmove2);
         window.draw(spriteShooter);
-        window.draw(spriteRock);
+        window.draw(foodBar);
+        window.draw(spriteFoodBar);
+        window.draw(foodText);
+        window.draw(RecordText);
+
+        if(pause==true){
+            window.draw(massageText);
+        }
 
         window.display();
     }
