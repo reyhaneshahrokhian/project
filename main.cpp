@@ -1,8 +1,13 @@
 #include "stdfix.h"
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
+using namespace std;
 using namespace sf;
+
 int main()
 {
     VideoMode vm(800,600);
@@ -59,7 +64,7 @@ int main()
     textureGrasmove2.loadFromFile("project image/grass move.jpg");
     Sprite spriteGrasmove2;
     spriteGrasmove2.setTexture(textureGrasmove2);
-    spriteGrasmove2.setPosition(510,0);
+    spriteGrasmove2.setPosition(500,0);
     bool grass2=false;
     float grass2Speed=0.0f;
 
@@ -101,6 +106,7 @@ int main()
     Text massageText;
     Text foodText;
     Text RecordText;
+    Text HighscoreText;
 
     Font font;
     font.loadFromFile("font.ttf");
@@ -118,16 +124,61 @@ int main()
     foodText.setPosition(10,0);
 
     RecordText.setFont(font);
-    RecordText.setString("Record = 0");
+    RecordText.setString("Score = 0");
     RecordText.setCharacterSize(30);
     RecordText.setFillColor(Color::Black);
-    RecordText.setPosition(350,0);
+    RecordText.setPosition(350,30);
+
+    HighscoreText.setFont(font);
+    HighscoreText.setString("Highscore = ");
+    HighscoreText.setCharacterSize(30);
+    HighscoreText.setFillColor(Color::Black);
+    HighscoreText.setPosition(320,0);
+
+    //sound gameover
+    sf::SoundBuffer gameover;
+    if(!gameover.loadFromFile("project sound/gameover.wav")){
+        cout<<"gfhg";
+    }
+    sf::Sound Gameover;
+    Gameover.setBuffer(gameover);
+    
+ /*   //sound eating
+    sf::SoundBuffer eating;
+    if(!eating.loadFromFile("project sound/food.wav")){
+        cout<<"jjj";
+    }
+    sf::Sound Food;
+    Food.setBuffer(eating);
+
+    //sound rock
+    sf::SoundBuffer breakingrock;
+    if(!eating.loadFromFile("project sound/rock.wav")){
+        cout<<"hhhh";
+    }
+    sf::Sound Rock;
+    Rock.setBuffer(breakingrock);  
+
+    //sound shooter
+    sf::SoundBuffer shooter;
+    if(!eating.loadFromFile("sproject sound/shooter.wav")){
+        cout<<"yyyy";
+    }
+    sf::Sound Shooter;
+    Shooter.setBuffer(shooter); */   
 
     bool pause=true;
 
-    float a;
+    float xfood,xgrass1,xgrass2,xrock,xshark=370;
+    float yfood,ygrass1,ygrass2,yrock,yshark=400;
+    bool touch=false;
     int record;
     int hold=0;
+    int highscore;
+
+    //file for records
+    fstream recordfile;
+    recordfile.open("record.txt");
 
     while (window.isOpen()){
         
@@ -142,6 +193,9 @@ int main()
             float foodRemaining =37.0f;
             foodBarwidth=200;
             foodBar.setSize(Vector2f(200,80));
+            foodBar.setFillColor(Color::White);
+            foodBar.setPosition(10,10);
+            
         }
         if(pause==false){
 
@@ -153,16 +207,64 @@ int main()
                 pause=true;
                 massageText.setString("Out of food!!");
                 massageText.setPosition(160,250);
+                Gameover.play();
             }
+
+            //getting positions
+            xgrass1= spriteGrasmove1.getPosition().x;
+            ygrass1= spriteGrasmove1.getPosition().y; 
+            xgrass2= spriteGrasmove2.getPosition().x;
+            ygrass2= spriteGrasmove2.getPosition().y;
+            xfood= spriteFood.getPosition().x;
+            yfood= spriteFood.getPosition().y; 
+            xrock= spriteRock.getPosition().x;
+            yrock= spriteRock.getPosition().y;            
+
+            //moving shark
+            if((Keyboard::isKeyPressed(Keyboard::Right)) || Keyboard::isKeyPressed(Keyboard::D)){
+                xshark=xshark+3;
+                spriteShark.setPosition(xshark,yshark);
+            }
+            if((Keyboard::isKeyPressed(Keyboard::Left)) || Keyboard::isKeyPressed(Keyboard::A)){
+                xshark=xshark-3;
+                spriteShark.setPosition(xshark,yshark);
+            }    
+            if((Keyboard::isKeyPressed(Keyboard::Up)) || Keyboard::isKeyPressed(Keyboard::W)){
+                if((yshark-3)>150){
+                    yshark=yshark-3;
+                    spriteShark.setPosition(xshark,yshark);
+                }
+            }                
+            if((Keyboard::isKeyPressed(Keyboard::Down)) || Keyboard::isKeyPressed(Keyboard::S)){
+                if((yshark+3)<600){
+                    yshark=yshark+3;
+                    spriteShark.setPosition(xshark,yshark);
+                }
+            }
+
+
         //record
         hold ++; 
         record +=hold/20;
         if(hold==20)
             hold=0;
         std::stringstream ss;
-        ss << "Record = " << record;
-        RecordText.setString(ss.str());    
+        ss << "Score = " << record;
+        RecordText.setString(ss.str());  
+        recordfile>>highscore;
+        std::stringstream SS;
+        SS<<"highscore = "<<highscore;
+        HighscoreText.setString(SS.str());      
+        if(highscore<record){
+            recordfile.open("record.txt",std::ofstream::out|std::ofstream::trunc); 
+            recordfile<<record;
+            std::stringstream SS;
+            SS<<"highscore = "<<record;
+            HighscoreText.setString(SS.str());   
+            recordfile.close();
 
+        }
+        
         if(!grass1){
             //grass1 speed
             srand(time(NULL)*2);
@@ -171,9 +273,7 @@ int main()
             grass1=true;
         }else{
             //moving grass1
-            spriteGrasmove1.setPosition(
-            100,spriteGrasmove1.getPosition().y+(grass1Speed*dt.asSeconds()));
-            
+            spriteGrasmove1.setPosition(100,spriteGrasmove1.getPosition().y+(grass1Speed*dt.asSeconds()));            
             if(spriteGrasmove1.getPosition().y >810){
                 grass1=false;
             }
@@ -187,9 +287,7 @@ int main()
             grass2=true;
         }else{
             //moving grass2
-            spriteGrasmove2.setPosition(
-                510,spriteGrasmove2.getPosition().y+(grass2Speed * dt.asSeconds()));
-        
+            spriteGrasmove2.setPosition(510,spriteGrasmove2.getPosition().y+(grass2Speed * dt.asSeconds()));       
             if(spriteGrasmove2.getPosition().y >810){
                 grass2=false;
             }
@@ -206,7 +304,6 @@ int main()
             spriteFood.setPosition(
             spriteFood.getPosition().x,    
             spriteFood.getPosition().y+(foodSpeed * dt.asSeconds()));
-            float a= spriteFood.getPosition().x;
             if(spriteFood.getPosition().y >810){
                 food=false;
             }
@@ -215,24 +312,64 @@ int main()
         if(!rock){
             //x rock
             srand(time(NULL)*3);
-            float x=(rand()%540)+101;
+            float x=(rand()%520)+101;
             do{
-            float x=(rand()%540)+101;
-            }while(a==x);
-            spriteRock.setPosition(x,-60);
+            float x=(rand()%520)+101;
+            }while(xfood==x);
+            spriteRock.setPosition(x,-80);
             rock=true;
         }else{
             //moving rock
             spriteRock.setPosition(
             spriteRock.getPosition().x,    
-            spriteRock.getPosition().y+(rockSpeed * dt.asSeconds()));
-        
+            spriteRock.getPosition().y+(rockSpeed * dt.asSeconds()));       
             if(spriteRock.getPosition().y >810){
                 rock=false;
             }
         }
+
+        //eating food
+        if((xshark+100)>=xfood && xshark<=(xfood+30) && yshark>=yfood && yshark<=(yfood+40)){
+            float foodRemaining =37.0f;
+            foodBarwidth=200;
+            foodBar.setSize(Vector2f(200,80));  
+            yfood=1000;
+         //   Food.play();          
+        }else if(xshark<=(xfood+30) && (xshark+100)>=xfood && (yshark+200)>=yfood && (yshark+200)<=(yfood+40)){
+            float foodRemaining =37.0f;
+            foodBarwidth=200;
+            foodBar.setSize(Vector2f(200,80)); 
+            yfood=1000; 
+        //    Food.play();          
+        }        
+
+        //be sensitive to grass
+        if(xshark<=300 && yshark>=ygrass1 && yshark<=(grass1-200)){
+            touch=true;  
+        }else if(xshark<=300 && (yshark+200)>=ygrass1 && (yshark+200)<=(ygrass1-200)){
+            touch=true;
+        }else if((xshark+100)>=500 && (yshark+200)>=ygrass2 && (yshark+200<=ygrass2+200)){
+            touch=true; 
+        }else if((xshark+100)>=500 && yshark>=ygrass2 && yshark<=(ygrass2+200)){
+            touch=true;
+        }else if(xshark<=100 || (xshark+100)>=700){
+            touch=true;
         }
 
+        //be sesitive to rock
+        if((xshark+100)>=xrock && xshark<=(xrock+80)  && yshark>=yrock && yshark<=(yrock+80)){
+            touch=true;
+        }else if(xshark<=(xrock+80) && (xshark+100)>=xrock && (yshark+200)>=yrock && (yshark+200)<=(yrock+80)){
+            touch=true;
+        }
+
+        if(touch==true){
+            pause=true;
+            massageText.setString("Game over!!");
+            massageText.setPosition(160,250);  
+            Gameover.play();         
+        }
+        } 
         window.clear();
         
         window.draw(spriteBackground);
@@ -248,13 +385,13 @@ int main()
         window.draw(spriteFoodBar);
         window.draw(foodText);
         window.draw(RecordText);
+        window.draw(HighscoreText);
 
         if(pause==true){
-            window.draw(massageText);
+            window.draw(massageText);        
         }
 
         window.display();
     }
-
     return 0;
 }
