@@ -148,13 +148,13 @@ int main()
 
     //sound rock
     sf::SoundBuffer breakingrock;
-    eating.loadFromFile("project sound/rock.wav");
+    breakingrock.loadFromFile("project sound/rock.wav");
     sf::Sound Rock;
     Rock.setBuffer(breakingrock);  
 
     //sound shooter
     sf::SoundBuffer shooter;
-    eating.loadFromFile("sproject sound/shooter.wav");
+    shooter.loadFromFile("project sound/shooter.wav");
     sf::Sound Shooter;
     Shooter.setBuffer(shooter);    
 
@@ -331,12 +331,13 @@ int main()
             }
             if(checkshoot){
                 spriteShooter.setPosition(xshooter,yshooter);
-                yshooter=yshooter-20;
-                if(yshooter==yrock+80 && xshooter>=xrock && xshooter<=(xrock+80)){
+                yshooter=yshooter-10;
+                if(yshooter<=(yrock+80) && yshooter>=yrock && xshooter>=xrock && xshooter<=(xrock+80)){
                     yrock=1000;
                     spriteRock.setPosition(xrock,yrock);
                     spriteShooter.setPosition(-10,-10);
                     Rock.play();
+                    checkshoot=false;
                 }
             }
 
@@ -358,11 +359,11 @@ int main()
             }        
 
             //be sensitive to grass
-            if(xshark<=300 && yshark>=ygrass1 && yshark<=(grass1-200)){
+            if(xshark<=300 && yshark<=(ygrass1+200) && yshark>=ygrass1){
                 touch=true;  
-            }else if(xshark<=300 && (yshark+200)>=ygrass1 && (yshark+200)<=(ygrass1-200)){
+            }else if(xshark<=300 && (yshark+200)<=(ygrass1+200) && (yshark+200)>=ygrass1){
                 touch=true;
-            }else if((xshark+70)>=500 && (yshark+200)>=ygrass2 && (yshark+200<=ygrass2+200)){
+            }else if((xshark+70)>=500 && (yshark+200)>=ygrass2 && (yshark+200)<=(ygrass2+200)){
                 touch=true; 
             }else if((xshark+70)>=500 && yshark>=ygrass2 && yshark<=(ygrass2+200)){
                 touch=true;
