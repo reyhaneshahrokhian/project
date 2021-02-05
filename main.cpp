@@ -24,10 +24,9 @@ int main()
     Texture textureRock;
     textureRock.loadFromFile("project image/rock.png");
     Sprite spriteRock;
-    spriteRock.setTexture(textureRock);
-    spriteRock.setPosition(400,100);   
+    spriteRock.setTexture(textureRock);  
+    spriteRock.setPosition(320,-250);
     bool rock=false;
-    float rockSpeed=70.0f;
 
     //food
     Texture textureFood;
@@ -36,7 +35,6 @@ int main()
     spriteFood.setTexture(textureFood);
     spriteFood.setPosition(300,100);
     bool food=false;
-    float foodSpeed=70.0f;
 
     //grass sides
     Texture textureGrasside1;
@@ -56,17 +54,13 @@ int main()
     textureGrasmove1.loadFromFile("project image/grass move.jpg");
     Sprite spriteGrasmove1;
     spriteGrasmove1.setTexture(textureGrasmove1);
-    spriteGrasmove1.setPosition(100,0);
-    bool grass1=false;
-    float grass1Speed=0.0f;
+    spriteGrasmove1.setPosition(100,-200);
       
     Texture textureGrasmove2;
     textureGrasmove2.loadFromFile("project image/grass move.jpg");
     Sprite spriteGrasmove2;
     spriteGrasmove2.setTexture(textureGrasmove2);
-    spriteGrasmove2.setPosition(500,0);
-    bool grass2=false;
-    float grass2Speed=0.0f;
+    spriteGrasmove2.setPosition(500,-400);
 
     //shark
     Texture textureShark;
@@ -79,7 +73,26 @@ int main()
     Texture textureShooter;
     textureShooter.loadFromFile("project image/shooter.png");
     Sprite spriteShooter;
-    spriteShooter.setTexture(textureShooter);    
+    spriteShooter.setTexture(textureShooter);   
+
+    //explosion 
+    Texture textureExplosion1;
+    textureExplosion1.loadFromFile("project image/step 1.png");
+    Sprite spriteExplosion1;
+    spriteExplosion1.setTexture(textureExplosion1); 
+    spriteExplosion1.setPosition(810,610);
+
+    Texture textureExplosion2;
+    textureExplosion2.loadFromFile("project image/step 2.png");
+    Sprite spriteExplosion2;
+    spriteExplosion2.setTexture(textureExplosion2);
+    spriteExplosion2.setPosition(810,610);
+
+    Texture textureExplosion3;
+    textureExplosion3.loadFromFile("project image/step 3.png");
+    Sprite spriteExplosion3;
+    spriteExplosion3.setTexture(textureExplosion3); 
+    spriteExplosion3.setPosition(810,610);           
 
     Clock clock; 
 
@@ -160,13 +173,15 @@ int main()
 
     bool pause=true;
 
-    float xfood,xgrass1,xgrass2,xrock,xshark=370,xshooter;
-    float yfood,ygrass1,ygrass2,yrock,yshark=400,yshooter;
+    float xfood,xgrass1=100,xgrass2=500,xrock=320,xshark=370,xshooter,xexp;
+    float yfood,ygrass1=-170,ygrass2=-370,yrock=-250,yshark=400,yshooter,yexp;
     bool touch=false;
     int record;
     int hold=0;
     int highscore;
     bool checkshoot=false;
+    int number=1;
+    int explosion=0,countexp=0;
 
     //file for records
     fstream recordfile;
@@ -181,6 +196,8 @@ int main()
 
         if(Keyboard::isKeyPressed(Keyboard::Return)){
             pause=false;
+            number=1;
+            rock=false;
             record =0;
             foodRemaining =37.0f;
             foodBarwidth=200;
@@ -205,10 +222,6 @@ int main()
             }
 
             //getting positions
-            xgrass1= spriteGrasmove1.getPosition().x;
-            ygrass1= spriteGrasmove1.getPosition().y; 
-            xgrass2= spriteGrasmove2.getPosition().x;
-            ygrass2= spriteGrasmove2.getPosition().y;
             xfood= spriteFood.getPosition().x;
             yfood= spriteFood.getPosition().y; 
             xrock= spriteRock.getPosition().x;
@@ -258,70 +271,86 @@ int main()
                 recordfile.close();
 
             }
-            
-            if(!grass1){
-                //grass1 speed
-                srand(time(NULL)*2);
-                grass1Speed = (rand()%50+50);
-                spriteGrasmove1.setPosition(100,-200);
-                grass1=true;
-            }else{
-                //moving grass1
-                spriteGrasmove1.setPosition(100,spriteGrasmove1.getPosition().y+(grass1Speed*dt.asSeconds()));            
-                if(spriteGrasmove1.getPosition().y >810){
-                    grass1=false;
-                }
-            }
-
-            if(!grass2){
-                //grass2 speed
-                srand(time(NULL)*6);
-                grass2Speed = (rand()%50+50);
-                spriteGrasmove2.setPosition(510,-200);
-                grass2=true;
-            }else{
-                //moving grass2
-                spriteGrasmove2.setPosition(510,spriteGrasmove2.getPosition().y+(grass2Speed * dt.asSeconds()));       
-                if(spriteGrasmove2.getPosition().y >810){
-                    grass2=false;
-                }
-            }
 
             if(!food){
                 //x food
-                srand(time(NULL)*3);
-                float x=(rand()%560)+101;
-                spriteFood.setPosition(x,-40);
+                srand(time(NULL));
+                xfood=(rand()%560)+101;
+                spriteFood.setPosition(xfood,-40);
                 food=true;
             }else{
                 //moving food
-                spriteFood.setPosition(
-                spriteFood.getPosition().x,    
-                spriteFood.getPosition().y+(foodSpeed * dt.asSeconds()));
-                if(spriteFood.getPosition().y >810){
+                yfood=yfood+2;
+                spriteFood.setPosition(xfood,yfood);
+                if(yfood >610){
                     food=false;
                 }
             }
 
-            if(!rock){
-                //x rock
-                srand(time(NULL)*3);
-                float x=(rand()%520)+101;
-                do{
-                float x=(rand()%520)+101;
-                }while(xfood==x);
-                spriteRock.setPosition(x,-80);
-                rock=true;
-            }else{
-                //moving rock
-                spriteRock.setPosition(
-                spriteRock.getPosition().x,    
-                spriteRock.getPosition().y+(rockSpeed * dt.asSeconds()));       
-                if(spriteRock.getPosition().y >810){
-                    rock=false;
+            //moving grasses and rock
+            if(number==1){
+                ygrass1=ygrass1+2;
+                ygrass2=ygrass2+2;
+                spriteGrasmove1.setPosition(xgrass1,ygrass1);
+                spriteGrasmove2.setPosition(xgrass2,ygrass2);
+                if(!rock){
+                    yrock=yrock+2;
+                    spriteRock.setPosition(xrock,yrock);
+                }    
+                if(ygrass2>=600){
+                    number=2;
+                    ygrass1=-170;
+                    ygrass2=-170;
+                    srand(time(NULL));
+                    do{
+                       xrock=(rand()%100)+301;
+                    }while(xfood==xrock);
+                    yrock=-170;  
+                    rock=false;              
                 }
             }
-
+            if(number==2){
+                ygrass1=ygrass1+2;
+                ygrass2=ygrass2+2;
+                spriteGrasmove1.setPosition(xgrass1,ygrass1);
+                spriteGrasmove2.setPosition(xgrass2,ygrass2);
+                if(!rock){
+                    yrock=yrock+2;
+                    spriteRock.setPosition(xrock,yrock);   
+                }                
+                if(ygrass2>=600){
+                    number=3;
+                    ygrass1=-370;
+                    ygrass2=-170;
+                    srand(time(NULL));
+                    do{
+                       xrock=(rand()%100)+301;
+                    }while(xfood==xrock);
+                    yrock=-250;   
+                    rock=false;                 
+                }
+            } 
+            if(number==3){
+                ygrass1=ygrass1+2;
+                ygrass2=ygrass2+2;
+                spriteGrasmove1.setPosition(xgrass1,ygrass1);
+                spriteGrasmove2.setPosition(xgrass2,ygrass2);   
+                if(!rock){             
+                    yrock=yrock+2;
+                    spriteRock.setPosition(xrock,yrock);  
+                }              
+                if(ygrass1>=600){
+                    number=1;
+                    ygrass1=-170;
+                    ygrass2=-370;
+                    srand(time(NULL));
+                    do{
+                       xrock=(rand()%100)+301;
+                    }while(xfood==xrock);
+                    yrock=-250;
+                    rock=false;                    
+                }
+            }
             //shooting
             if(Keyboard::isKeyPressed(Keyboard::Z) ||Keyboard::isKeyPressed(Keyboard::X) ||Keyboard::isKeyPressed(Keyboard::C)){
                 checkshoot=true;
@@ -333,13 +362,46 @@ int main()
                 spriteShooter.setPosition(xshooter,yshooter);
                 yshooter=yshooter-10;
                 if(yshooter<=(yrock+80) && yshooter>=yrock && xshooter>=xrock && xshooter<=(xrock+80)){
-                    yrock=1000;
+                    rock=true;
+                    xexp=xrock;
+                    yexp=yrock;
+                    yrock=-80;
                     spriteRock.setPosition(xrock,yrock);
-                    spriteShooter.setPosition(-10,-10);
+                    spriteShooter.setPosition(810,610);
+                    explosion=1;
                     Rock.play();
                     checkshoot=false;
                 }
             }
+
+            //animation
+            if(explosion==1){
+                spriteExplosion1.setPosition(xexp,yexp);
+                countexp++;
+                if(countexp==5){ 
+                    explosion=2;
+                    countexp=0;
+                    spriteExplosion1.setPosition(810,610);
+                }                  
+            }else if(explosion==2){
+                spriteExplosion2.setPosition(xexp,yexp);
+                countexp++;
+                if(countexp==5){ 
+                    explosion=3;
+                    countexp=0;
+                    spriteExplosion2.setPosition(810,610);
+                }
+                             
+            }else if(explosion==3){
+                spriteExplosion3.setPosition(xexp,yexp);
+                countexp++;
+                if(countexp==5){ 
+                    explosion=0;
+                    countexp=0;
+                    spriteExplosion3.setPosition(810,610);
+                }                
+            }         
+ 
 
             //eating food
             if((xshark+100)>=xfood && xshark<=(xfood+30) && yshark>=yfood && yshark<=(yfood+40)){
@@ -372,11 +434,11 @@ int main()
             }
 
             //be sesitive to rock
-            if((xshark+100)>=xrock && xshark<=(xrock+80)  && yshark>=yrock && yshark<=(yrock+80)){
+            if((xshark+100)>=xrock && xshark<=(xrock+100)  && yshark>=yrock && yshark<=(yrock+100)){
                 touch=true;
                 yrock=1000;
                 spriteRock.setPosition(xrock,yrock);
-            }else if(xshark<=(xrock+80) && (xshark+100)>=xrock && (yshark+200)>=yrock && (yshark+200)<=(yrock+80)){
+            }else if(xshark<=(xrock+100) && (xshark+100)>=xrock && (yshark+200)>=yrock && (yshark+200)<=(yrock+100)){
                 touch=true;
                 yrock=1000;
                 spriteRock.setPosition(xrock,yrock);
@@ -407,6 +469,9 @@ int main()
         window.draw(foodText);
         window.draw(RecordText);
         window.draw(HighscoreText);
+        window.draw(spriteExplosion1);
+        window.draw(spriteExplosion2);
+        window.draw(spriteExplosion3);
 
         if(pause==true){
             window.draw(massageText);   
